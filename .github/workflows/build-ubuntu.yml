@@ -38,7 +38,8 @@ jobs:
           nlohmann-json3-dev libdisplay-info-dev \
           hwdata libseat-dev libevdev-dev \
           libxml2-dev doctest-dev cmake \
-          libfreetype-dev libpango1.0-dev
+          libfreetype-dev libpango1.0-dev \
+          libgtkmm-3.0-dev
 
     - name: Build and install to staging
       run: |
