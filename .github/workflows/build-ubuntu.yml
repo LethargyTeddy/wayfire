@@ -12,7 +12,6 @@ jobs:
     container: debian:sid
 
     steps:
-    # 先装 git，再 checkout
     - name: Install git
       run: |
         apt update
@@ -26,6 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         apt install -y --no-install-recommends \
+          build-essential \
           meson ninja-build pkg-config \
           libwayland-dev wayland-protocols \
           libwlroots-0.20-dev \
