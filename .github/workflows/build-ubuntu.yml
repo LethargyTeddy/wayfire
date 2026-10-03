@@ -77,6 +77,19 @@ jobs:
         rm -rf staging/usr/include
         rm -rf staging/usr/lib/x86_64-linux-gnu/pkgconfig
 
+    - name: Remove libraries provided by system packages
+      run: |
+        find staging/usr/lib -name "*.so*" -type f | while read -r lib; do
+          syspath="${lib#staging}"
+          pkg=$(dpkg -S "$syspath" 2>/dev/null | cut -d: -f1)
+          if [ -n "$pkg" ]; then
+            echo "Removing $lib (provided by $pkg)"
+            rm -f "$lib"
+          fi
+        done
+        # 清理因删除文件而变成悬空的符号链接
+        find staging/usr/lib -xtype l -delete
+
     - name: Generate DEBIAN/control
       run: |
         VERSION=$(meson introspect build --projectinfo \
