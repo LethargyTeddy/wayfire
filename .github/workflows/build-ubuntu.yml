@@ -18,6 +18,7 @@ jobs:
 
     - name: Install dependencies (all from apt)
       run: |
+        sudo add-apt-repository universe -y
         sudo apt update
         sudo apt install -y \
           meson ninja-build pkg-config \
