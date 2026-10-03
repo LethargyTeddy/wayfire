@@ -1,0 +1,50 @@
+name: Build Wayfire on Ubuntu (glibc, GCC)
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build with GCC on Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          meson ninja-build pkg-config \
+          libwayland-dev wayland-protocols \
+          libegl1-mesa-dev libgles2-mesa-dev libgbm-dev \
+          libinput-dev libxkbcommon-dev \
+          libpixman-1-dev libcairo2-dev libglm-dev \
+          libjpeg-dev libdrm-dev libsystemd-dev \
+          libx11-xcb-dev libxcb-composite0-dev \
+          libxcb-xinput-dev xwayland \
+          nlohmann-json3-dev libdisplay-info-dev \
+          hwdata-dev libseat-dev libevdev-dev \
+          libxml2-dev doctest-dev cmake
+
+    - name: Build Wayfire
+      run: |
+        meson setup build --buildtype=release -Duse_system_wlroots=enabled
+        ninja -C build
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: wayfire-ubuntu-glibc
+        # 只上传真正有用的可执行文件和库，避免 300MB 的中间产物
+        path: |
+          build/src/wayfire
+          build/src/wf-config
+          build/src/wcm
+          build/src/libwayfire.so*
+        if-no-files-found: warn
