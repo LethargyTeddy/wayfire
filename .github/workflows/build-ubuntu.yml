@@ -1,4 +1,4 @@
-name: Build Wayfire on Ubuntu 26.04
+name: Build Wayfire on Debian sid
 
 on:
   push:
@@ -7,8 +7,9 @@ on:
 
 jobs:
   build:
-    name: Build with GCC on Ubuntu 26.04
-    runs-on: ubuntu-26.04   # 关键：使用 26.04
+    name: Build with GCC on Debian sid
+    runs-on: ubuntu-latest
+    container: debian:sid  # 关键：使用 Debian sid 容器
 
     steps:
     - name: Checkout code
@@ -16,11 +17,10 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Install dependencies (all from apt)
+    - name: Install dependencies
       run: |
-        sudo add-apt-repository universe -y
-        sudo apt update
-        sudo apt install -y \
+        apt update
+        apt install -y --no-install-recommends \
           meson ninja-build pkg-config \
           libwayland-dev wayland-protocols \
           libwlroots-0.20-dev \
@@ -51,7 +51,7 @@ jobs:
     - name: Upload stripped install tree
       uses: actions/upload-artifact@v4
       with:
-        name: wayfire-ubuntu2604
+        name: wayfire-debian-sid
         path: staging/
         if-no-files-found: error
         retention-days: 30
