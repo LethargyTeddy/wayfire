@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         apt install -y --no-install-recommends \
-          build-essential \
+          build-essential gettext \
           meson ninja-build pkg-config \
           libwayland-dev wayland-protocols \
           libwlroots-0.20-dev \
