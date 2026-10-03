@@ -1,4 +1,4 @@
-name: Build Wayfire on Debian sid
+name: Build Wayfire .deb on Debian sid
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build with GCC on Debian sid
+    name: Build .deb on Debian sid
     runs-on: ubuntu-latest
     container: debian:sid
 
@@ -22,7 +22,7 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Install dependencies
+    - name: Install build dependencies
       run: |
         apt install -y --no-install-recommends \
           build-essential gettext \
@@ -40,23 +40,65 @@ jobs:
           libxml2-dev doctest-dev cmake \
           libfreetype-dev libpango1.0-dev
 
-    - name: Build Wayfire (use system wlroots)
+    - name: Build and install to staging
       run: |
-        meson setup build --buildtype=release -Duse_system_wlroots=enabled
+        meson setup build --buildtype=release \
+          --prefix=/usr \
+          -Duse_system_wlroots=enabled
         ninja -C build
-
-    - name: Install to staging directory
-      run: |
         DESTDIR=$PWD/staging ninja -C build install
 
     - name: Strip binaries
       run: |
-        find staging -type f \( -name "*.so*" -o -perm -u+x \) -exec strip --strip-unneeded {} + 2>/dev/null || true
+        find staging -type f \( -name "*.so*" -o -perm -u+x \) \
+          -exec strip --strip-unneeded {} + 2>/dev/null || true
 
-    - name: Upload stripped install tree
+    - name: Generate DEBIAN/control
+      run: |
+        VERSION=$(meson introspect build --projectinfo \
+          | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
+        ARCH=$(dpkg --print-architecture)
+        INSTALLED_SIZE=$(du -sk staging/usr | cut -f1)
+
+        DEPS=$(find staging -type f \( -perm -u+x -o -name "*.so*" \) \
+          | while read f; do ldd "$f" 2>/dev/null; done \
+          | grep "=> /" | awk '{print $3}' | sort -u \
+          | while read lib; do
+              dpkg -S "$lib" 2>/dev/null | cut -d: -f1
+            done | sort -u | grep -v '^$' | paste -sd, -)
+
+        mkdir -p staging/DEBIAN
+        {
+          echo "Package: wayfire"
+          echo "Version: ${VERSION}"
+          echo "Architecture: ${ARCH}"
+          echo "Maintainer: LethargyTeddy <noreply@example.com>"
+          echo "Installed-Size: ${INSTALLED_SIZE}"
+          echo "Depends: ${DEPS}"
+          echo "Section: x11"
+          echo "Priority: optional"
+          echo "Homepage: https://github.com/WayfireWM/wayfire"
+          echo "Description: 3D Wayland compositor"
+          echo " Wayfire is a 3D Wayland compositor aiming to be customizable"
+          echo " and extensible, with a focus on lightweight and smooth animations."
+        } > staging/DEBIAN/control
+
+        echo "=== Generated control file ==="
+        cat staging/DEBIAN/control
+
+    - name: Build .deb
+      run: |
+        VERSION=$(meson introspect build --projectinfo \
+          | python3 -c "import sys,json; print(json.load(sys.stdin)['version'])")
+        ARCH=$(dpkg --print-architecture)
+        dpkg-deb --build --root-owner-group staging \
+          "wayfire_${VERSION}_${ARCH}.deb"
+        ls -lh wayfire_*.deb
+
+    - name: Upload .deb
       uses: actions/upload-artifact@v4
       with:
-        name: wayfire-debian-sid
-        path: staging/
+        name: wayfire-deb
+        path: wayfire_*.deb
         if-no-files-found: error
         retention-days: 30
