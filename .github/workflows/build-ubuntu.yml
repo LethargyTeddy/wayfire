@@ -9,9 +9,15 @@ jobs:
   build:
     name: Build with GCC on Debian sid
     runs-on: ubuntu-latest
-    container: debian:sid  # 关键：使用 Debian sid 容器
+    container: debian:sid
 
     steps:
+    # 先装 git，再 checkout
+    - name: Install git
+      run: |
+        apt update
+        apt install -y --no-install-recommends git ca-certificates
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
@@ -19,7 +25,6 @@ jobs:
 
     - name: Install dependencies
       run: |
-        apt update
         apt install -y --no-install-recommends \
           meson ninja-build pkg-config \
           libwayland-dev wayland-protocols \
