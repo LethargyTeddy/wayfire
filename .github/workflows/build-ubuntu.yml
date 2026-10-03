@@ -41,7 +41,8 @@ jobs:
           libfreetype-dev libpango1.0-dev \
           libgtkmm-3.0-dev libglibmm-2.4-dev \
           libfmt-dev \
-          libvulkan-dev glslang-tools
+          libvulkan-dev glslang-tools \
+          libliftoff-dev libdisplay-info-dev libdrm-dev
 
     - name: Build and install to staging
       run: |
