@@ -26,20 +26,22 @@ jobs:
       run: |
         apt install -y --no-install-recommends \
           build-essential gettext \
-          meson ninja-build pkg-config \
+          meson ninja-build pkg-config cmake \
           libwayland-dev wayland-protocols \
           libwlroots-0.20-dev \
           libegl1-mesa-dev libgles2-mesa-dev libgbm-dev \
           libinput-dev libxkbcommon-dev \
+          libxkbregistry-dev \
           libpixman-1-dev libcairo2-dev libglm-dev \
           libjpeg-dev libdrm-dev libsystemd-dev \
           libx11-xcb-dev libxcb-composite0-dev \
           libxcb-xinput-dev xwayland \
           nlohmann-json3-dev libdisplay-info-dev \
           hwdata libseat-dev libevdev-dev \
-          libxml2-dev doctest-dev cmake \
+          libxml2-dev doctest-dev \
           libfreetype-dev libpango1.0-dev \
-          libgtkmm-3.0-dev
+          libgtkmm-3.0-dev libglibmm-2.4-dev \
+          libfmt-dev
 
     - name: Build and install to staging
       run: |
