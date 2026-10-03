@@ -29,22 +29,27 @@ jobs:
           libx11-xcb-dev libxcb-composite0-dev \
           libxcb-xinput-dev xwayland \
           nlohmann-json3-dev libdisplay-info-dev \
-          hwdata-dev libseat-dev libevdev-dev \
-          libxml2-dev doctest-dev cmake
+          hwdata libseat-dev libevdev-dev \
+          libxml2-dev doctest-dev cmake \
+          libfreetype-dev libpango1.0-dev
 
     - name: Build Wayfire
       run: |
         meson setup build --buildtype=release -Duse_system_wlroots=enabled
         ninja -C build
 
-    - name: Upload build artifacts
+    - name: Install to staging directory
+      run: |
+        DESTDIR=$PWD/staging ninja -C build install
+
+    - name: Strip binaries
+      run: |
+        find staging -type f \( -name "*.so*" -o -perm -u+x \) -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+    - name: Upload stripped install tree
       uses: actions/upload-artifact@v4
       with:
         name: wayfire-ubuntu-glibc
-        # 只上传真正有用的可执行文件和库，避免 300MB 的中间产物
-        path: |
-          build/src/wayfire
-          build/src/wf-config
-          build/src/wcm
-          build/src/libwayfire.so*
-        if-no-files-found: warn
+        path: staging/
+        if-no-files-found: error
+        retention-days: 30
