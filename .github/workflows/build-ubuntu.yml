@@ -42,16 +42,38 @@ jobs:
 
     - name: Build and install to staging
       run: |
+        # wayfire
         meson setup build --buildtype=release \
           --prefix=/usr \
           -Duse_system_wlroots=enabled
         ninja -C build
         DESTDIR=$PWD/staging ninja -C build install
 
+        # 把 wayfire 装好的 wf-config 同步到容器系统里
+        # 这样 wcm 就能通过正常的 pkg-config 找到它
+        cp -r staging/usr/* /usr/
+        ldconfig
+
+        # wcm（无需锁定版本）
+        git clone https://github.com/WayfireWM/wcm.git
+        cd wcm
+        meson setup build --buildtype=release \
+          --prefix=/usr \
+          -Duse_system_wfconfig=enabled
+        ninja -C build
+        DESTDIR=$PWD/staging ninja -C build install
+        cd ..
+        cp -r wcm/staging/* staging/
+
     - name: Strip binaries
       run: |
         find staging -type f \( -name "*.so*" -o -perm -u+x \) \
           -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+    - name: Remove development files
+      run: |
+        rm -rf staging/usr/include
+        rm -rf staging/usr/lib/x86_64-linux-gnu/pkgconfig
 
     - name: Generate DEBIAN/control
       run: |
