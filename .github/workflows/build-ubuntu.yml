@@ -1,4 +1,4 @@
-name: Build Wayfire on Ubuntu (glibc, GCC)
+name: Build Wayfire on Ubuntu 26.04
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build with GCC on Ubuntu 26.04
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-26.04   # 关键：使用 26.04
 
     steps:
     - name: Checkout code
@@ -16,12 +16,13 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Install dependencies
+    - name: Install dependencies (all from apt)
       run: |
         sudo apt update
         sudo apt install -y \
           meson ninja-build pkg-config \
           libwayland-dev wayland-protocols \
+          libwlroots-0.20-dev \
           libegl1-mesa-dev libgles2-mesa-dev libgbm-dev \
           libinput-dev libxkbcommon-dev \
           libpixman-1-dev libcairo2-dev libglm-dev \
@@ -33,9 +34,9 @@ jobs:
           libxml2-dev doctest-dev cmake \
           libfreetype-dev libpango1.0-dev
 
-    - name: Build Wayfire
+    - name: Build Wayfire (use system wlroots)
       run: |
-        meson setup build --buildtype=release -Duse_system_wlroots=disabled
+        meson setup build --buildtype=release -Duse_system_wlroots=enabled
         ninja -C build
 
     - name: Install to staging directory
@@ -49,7 +50,7 @@ jobs:
     - name: Upload stripped install tree
       uses: actions/upload-artifact@v4
       with:
-        name: wayfire-ubuntu-glibc
+        name: wayfire-ubuntu2604
         path: staging/
         if-no-files-found: error
         retention-days: 30
