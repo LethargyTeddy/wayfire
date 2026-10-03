@@ -57,9 +57,7 @@ jobs:
         # wcm（无需锁定版本）
         git clone https://github.com/WayfireWM/wcm.git
         cd wcm
-        meson setup build --buildtype=release \
-          --prefix=/usr \
-          -Duse_system_wfconfig=enabled
+        meson setup build --buildtype=release --prefix=/usr
         ninja -C build
         DESTDIR=$PWD/staging ninja -C build install
         cd ..
