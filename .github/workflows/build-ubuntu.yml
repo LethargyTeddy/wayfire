@@ -28,7 +28,6 @@ jobs:
           build-essential gettext \
           meson ninja-build pkg-config cmake \
           libwayland-dev wayland-protocols \
-          libwlroots-0.20-dev \
           libegl1-mesa-dev libgles2-mesa-dev libgbm-dev \
           libinput-dev libxkbcommon-dev \
           libxkbregistry-dev \
@@ -41,14 +40,16 @@ jobs:
           libxml2-dev doctest-dev \
           libfreetype-dev libpango1.0-dev \
           libgtkmm-3.0-dev libglibmm-2.4-dev \
-          libfmt-dev
+          libfmt-dev \
+          libvulkan-dev glslang-tools
 
     - name: Build and install to staging
       run: |
         # wayfire
         meson setup build --buildtype=release \
           --prefix=/usr \
-          -Duse_system_wlroots=enabled
+          -Dvulkan_effects=true
+          -Duse_system_wlroots=disabled
         ninja -C build
         DESTDIR=$PWD/staging ninja -C build install
 
