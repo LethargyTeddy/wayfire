@@ -49,6 +49,7 @@ jobs:
         # wayfire
         meson setup build --buildtype=release \
           --prefix=/usr \
+          -Dxwayland=enabled \
           -Dvulkan_effects=true \
           -Duse_system_wlroots=disabled
         ninja -C build
