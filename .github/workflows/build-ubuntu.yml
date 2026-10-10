@@ -40,7 +40,7 @@ jobs:
           libxml2-dev doctest-dev \
           libfreetype-dev libpango1.0-dev \
           libgtkmm-3.0-dev libglibmm-2.4-dev \
-          libfmt-dev \
+          libfmt-dev libxcb-ewmh-dev \
           libvulkan-dev glslang-tools \
           libliftoff-dev libdisplay-info-dev libdrm-dev
 
