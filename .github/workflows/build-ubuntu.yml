@@ -42,6 +42,9 @@ jobs:
           libgtkmm-3.0-dev libglibmm-2.4-dev \
           libfmt-dev libxcb-ewmh-dev \
           libvulkan-dev glslang-tools \
+          libxcb1-dev libxcb-composite0-dev \
+          libxcb-render0-dev libxcb-res0-dev\
+          libxcb-xfixes0-dev \
           libliftoff-dev libdisplay-info-dev libdrm-dev
 
     - name: Build and install to staging
